@@ -1,0 +1,8 @@
+{
+  "name": "Moh Stylist",
+  "description": "Moh Stylist is a premium Kenyan marketplace featuring a black, gold, and white aesthetic. Explore fashion, beauty, and local brands, view interactive styling tutorials on Moh TV, book personal consults, read Nairobi fashion blogs, and experience simulated M-Pesa, card, and PayPal checkout alongside a custom AI concierge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
