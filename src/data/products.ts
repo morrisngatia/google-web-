@@ -291,5 +291,182 @@ export const PRODUCTS: Product[] = [
       "Top Notes": "Damascus Rose, Cardamom, Pink Pepper",
       "Base Notes": "Cambodian Oudh, Sandalwood, Golden Amber, Leather"
     }
+  },
+  {
+    id: "moh-13",
+    name: "Premium Handcrafted Safari Veldskoen",
+    brand: "Limuru Leather Co.",
+    category: "Local Brands",
+    description: "Rugged yet comfortable hand-stitched premium nubuck leather boots built for urban streets and safari trails alike.",
+    detailedDescription: "Worn by explorers and styled by innovators, our Limuru-crafted Safari Veldskoen ('Vellies') are constructed with ultra-durable premium nubuck leather. Features a dual-stitch welt, memory foam leather insoles for exceptional local comfort, and a non-slip recycled rubber sole. A true representation of Kenyan heritage footwear that only gets better with age.",
+    priceKES: 7500,
+    priceUSD: 57.50,
+    rating: 4.8,
+    reviews: [
+      { author: "Kariuki N.", rating: 5, comment: "Unbelievably sturdy and extremely comfortable. Easily matches with chinos or jeans.", date: "2026-07-02" },
+      { author: "Nora P.", rating: 4, comment: "Excellent leather texture. Takes a few days to break in but absolutely worth it.", date: "2026-07-06" }
+    ],
+    image: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Upper Material": "100% Genuine Nubuck Calf Leather",
+      "Insole": "Ergonomic Memory Foam covered with breathable lining",
+      "Sole": "Recycled Heavy-Duty Rubber",
+      "Craftsmanship": "Hand-stitched in Limuru, Kenya"
+    }
+  },
+  {
+    id: "moh-14",
+    name: "Maasai Beaded Heritage Summer Sandals",
+    brand: "Moh Stylist Couture",
+    category: "Local Brands",
+    description: "Elegant open-toe leather sandals decorated with vibrant, hand-sewn Maasai glass beads.",
+    detailedDescription: "Embrace the sunshine with our exquisite Maasai Beaded Sandals. Each bead is individually hand-threaded by female artisans in Narok onto premium locally sourced cowhide leather. Featuring a secure toe-loop design and a soft, padded footbed for daily wear around Nairobi's cozy spots.",
+    priceKES: 3200,
+    priceUSD: 24.50,
+    rating: 5.0,
+    reviews: [
+      { author: "Asha L.", rating: 5, comment: "Beautiful bead patterns and very soft leather. These are my absolute go-to sandals now!", date: "2026-06-25" }
+    ],
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Material": "Genuine Kenyan leather, high-grade glass seed beads",
+      "Design": "Classic T-Strap with secure buckle closure",
+      "Comfort": "Dual-layer cushion footbed",
+      "Artisan Source": " Narok Women's Beading Guild"
+    }
+  },
+  {
+    id: "moh-15",
+    name: "Mombasa Swahili Kikoy Summer Wrap",
+    brand: "Pwani Weavers",
+    category: "Local Brands",
+    description: "Traditional vibrant hand-woven 100% cotton sarong-wrap featuring rich colors and knotted fringes.",
+    detailedDescription: "The Kikoy is a traditional Swahili wrap woven with care on the beautiful Kenyan coast. Made from 100% long-staple combed cotton, it is incredibly soft, lightweight, and versatile. Use it as a stylish beach wrap, a cozy neck scarf, a lightweight throw, or even an elegant safari headwrap. Hand-knotted fringes add an authentic, high-quality touch.",
+    priceKES: 1800,
+    priceUSD: 13.80,
+    rating: 4.7,
+    reviews: [
+      { author: "Fatma S.", rating: 5, comment: "Vibrant colors that don't fade at all. Soft cotton feels wonderful on the skin.", date: "2026-05-18" }
+    ],
+    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Fabric": "100% Combed Kenyan Cotton",
+      "Dimensions": "170cm x 100cm",
+      "Edges": "Traditional hand-twisted knotted fringes",
+      "Origin": " Mombasa Coastal Artisans"
+    }
+  },
+  {
+    id: "moh-16",
+    name: "Royal Kitenge Wax Bomber Jacket",
+    brand: "Moh Stylist Couture",
+    category: "Fashion",
+    description: "A showstopping street-chic bomber jacket made with authentic African wax print patterns and high-comfort satin lining.",
+    detailedDescription: "Redefine urban high-fashion with our signature Kitenge Bomber Jacket. Merging classic streetwear aesthetics with bold African heritage, this jacket features authentic wax-print fabrics imported from local markets and tailored by Moh's select team. Outfitted with high-quality brass zippers, elasticated cuffs, and a premium quilted gold-satin inner lining that is perfect for cool Nairobi evenings.",
+    priceKES: 5500,
+    priceUSD: 42.00,
+    rating: 4.9,
+    reviews: [
+      { author: "Mugambi J.", rating: 5, comment: "An absolutely stunning statement piece. The wax print fabric is rich and firm. Fits perfectly!", date: "2026-07-09" }
+    ],
+    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Shell": "100% Authentic Cotton Ankara Wax Print",
+      "Lining": "Premium quilted gold satin lining",
+      "Hardware": "Heavy-duty YKK antique brass zipper",
+      "Details": "Deep side welt pockets & interior utility pocket"
+    }
+  },
+  {
+    id: "moh-17",
+    name: "Lamu Island Breeze Linen Shirt",
+    brand: "Moh Stylist Couture",
+    category: "Fashion",
+    description: "An ultra-breathable, lightweight pure linen shirt with Swahili hand-stitched detailing on the cuffs.",
+    detailedDescription: "Inspired by the slow, beautiful coastal winds of Lamu Island. This pure white linen shirt is designed to keep you cool and elegant under any sun. Features customized Mother of Pearl buttons and a refined mandarin collar with delicate coastal-motif embroidery. Perfect for sunset dhow cruises or weekend brunches.",
+    priceKES: 6200,
+    priceUSD: 48.00,
+    rating: 4.9,
+    reviews: [
+      { author: "Khalid S.", rating: 5, comment: "Breathes incredibly well and doesn't cling. Elegant collar design.", date: "2026-07-01" }
+    ],
+    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Material": "100% Pure Italian Linen",
+      "Fit": "Modern Tailored Fit",
+      "Collar": "Mandarin style with coastal embroidery details",
+      "Care": "Cold hand wash or dry clean"
+    }
+  },
+  {
+    id: "moh-18",
+    name: "Wild Ochre Whipped Shea Body Butter",
+    brand: "Moh Beauty Lab",
+    category: "Beauty",
+    description: "An intensive moisturizing body butter whipped with wild East African Nilotica Shea, cocoa butter, and avocado oil.",
+    detailedDescription: "Pamper your skin with our signature whipped Nilotica Shea body butter. Cultivated in local Northern regions, our premium Nilotica shea butter has a silky, melt-in-your-skin texture. Enhanced with Naivasha cold-pressed avocado oil and rich cocoa butter to nourish, fade stretch marks, and provide deep hydration to skin parched by sun or high-altitude dry air.",
+    priceKES: 4200,
+    priceUSD: 32.50,
+    rating: 4.8,
+    reviews: [
+      { author: "Mercy T.", rating: 5, comment: "Unbelievable texture! It melts like oil onto the skin and keeps me hydrated all day. Smells like vanilla and cocoa.", date: "2026-07-10" }
+    ],
+    image: "https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Key Ingredients": "East African Nilotica Shea Butter, Cocoa Butter, Naivasha Cold-Pressed Avocado Oil, Vanilla Bean extract",
+      "Volume": "250ml / 8.4 fl oz",
+      "Scent": "Natural Cocoa and Warm Vanilla",
+      "Texture": "Whipped, light, fast-absorbing"
+    }
+  },
+  {
+    id: "moh-19",
+    name: "Rift Valley Obsidian Teardrop Earrings",
+    brand: "Sinya Artisans",
+    category: "Local Brands",
+    description: "Striking drop earrings featuring hand-polished black volcanic obsidian stone set in local hammered brass.",
+    detailedDescription: "A glorious piece of the Great Rift Valley. These earrings feature genuine black obsidian, a natural volcanic glass polished to a glass-mirror finish, hand-set in dynamic hammered brass frames. Forged by local artists in Nakuru and completed in Nairobi, these lightweight drop earrings tell a story of volcanic soil and brilliant local metalwork.",
+    priceKES: 3800,
+    priceUSD: 29.00,
+    rating: 5.0,
+    reviews: [
+      { author: "Naisula E.", rating: 5, comment: "Absolute stunning craftsmanship. Extremely lightweight despite the stone. I love the volcanic connection!", date: "2026-06-20" }
+    ],
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Stone": "Genuine Polished Volcanic Obsidian from Rift Valley",
+      "Metal": "Reclaimed Local Hammered Brass",
+      "Drop Length": "4.5cm",
+      "Hypoallergenic": "Yes, lead and nickel free posts"
+    }
+  },
+  {
+    id: "moh-20",
+    name: "Hand-Stitched Safari Travel Duffel Bag",
+    brand: "Limuru Leather Co.",
+    category: "Lifestyle",
+    description: "A luxury overnight weekend travel duffel bag made of robust full-grain cowhide leather and solid brass fittings.",
+    detailedDescription: "Designed for luxury safaris and executive travel. This premium duffel is handcrafted in Limuru, Kenya from full-grain thick cowhide leather that develops a gorgeous vintage patina over time. It features a spacious interior lined with heavy-duty cotton canvas, heavy-duty brass zippers, reinforced leather shoulder straps, and a separate shoe compartment.",
+    priceKES: 18500,
+    priceUSD: 142.00,
+    rating: 5.0,
+    reviews: [
+      { author: "David K.", rating: 5, comment: "Incredibly thick leather, magnificent solid brass details, and outstanding stitching. Fits my clothes for a 4-day trip perfectly.", date: "2026-07-12" }
+    ],
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=70&w=400",
+    inStock: true,
+    specs: {
+      "Material": "100% Full-Grain Limuru Cowhide Leather",
+      "Fittings": "Heavy-Duty Solid Antique Brass buckle and zippers",
+      "Lining": "Premium heavy cotton duck canvas",
+      "Dimensions": "52cm x 28cm x 26cm (Cabin approved)"
+    }
   }
 ];

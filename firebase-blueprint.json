@@ -1,0 +1,250 @@
+{
+  "entities": {
+    "userMonetization": {
+      "title": "User Monetization Profile",
+      "description": "Stores user monetization status, referral codes, and affiliate earnings data.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The Firebase UID of the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "isActivated": {
+          "type": "boolean",
+          "description": "Whether the user paid 100 KSh and activated their monetization."
+        },
+        "referralCode": {
+          "type": "string",
+          "description": "Unique shareable affiliate referral code."
+        },
+        "clicks": {
+          "type": "integer",
+          "description": "Number of clicks received on their shared link."
+        },
+        "salesCount": {
+          "type": "integer",
+          "description": "Number of successful sales referred."
+        },
+        "earningsUSD": {
+          "type": "number",
+          "description": "Total affiliate commission earned in USD."
+        },
+        "mpesaNumber": {
+          "type": "string",
+          "description": "M-Pesa number for withdrawal payouts."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when the monetization profile was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of the last update."
+        }
+      },
+      "required": ["id", "isActivated", "referralCode", "clicks", "salesCount", "earningsUSD"]
+    },
+    "referralSale": {
+      "title": "Referral Sale Record",
+      "description": "Stores details of sales successfully referred by affiliates.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique sale record ID."
+        },
+        "referrerId": {
+          "type": "string",
+          "description": "The UID of the referring affiliate."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "The ID of the order that generated the commission."
+        },
+        "amountKES": {
+          "type": "number",
+          "description": "The checkout amount in KES."
+        },
+        "amountUSD": {
+          "type": "number",
+          "description": "The checkout amount in USD."
+        },
+        "commissionUSD": {
+          "type": "number",
+          "description": "The affiliate's commission earned from this sale (usually 0.5 USD)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp when the referral sale occurred."
+        }
+      },
+      "required": ["id", "referrerId", "orderId", "amountKES", "commissionUSD", "timestamp"]
+    },
+    "withdrawal": {
+      "title": "Withdrawal Request",
+      "description": "Stores details of withdrawal cash-out requests submitted by affiliates.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique withdrawal request ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the requesting affiliate."
+        },
+        "amountUSD": {
+          "type": "number",
+          "description": "The requested withdrawal amount in USD."
+        },
+        "amountKES": {
+          "type": "number",
+          "description": "The requested withdrawal amount in KES."
+        },
+        "mpesaNumber": {
+          "type": "string",
+          "description": "The M-Pesa phone number for the payout transfer."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the withdrawal (pending, completed, failed)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp when the request was submitted."
+        }
+      },
+      "required": ["id", "userId", "amountUSD", "amountKES", "mpesaNumber", "status", "timestamp"]
+    },
+    "whatsappBot": {
+      "title": "WhatsApp Bot",
+      "description": "Stores details and configuration of a hosted WhatsApp Bot owned by the user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique ID of the WhatsApp Bot."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the owner."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the bot."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Bot's WhatsApp phone number."
+        },
+        "status": {
+          "type": "string",
+          "description": "Uptime status (active, offline)."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Bot trigger mode (ai, keyword, welcome_only)."
+        },
+        "welcomeMessage": {
+          "type": "string",
+          "description": "The initial welcome greeting."
+        },
+        "promptContext": {
+          "type": "string",
+          "description": "System instruction prompt for Gemini (AI mode)."
+        },
+        "keywords": {
+          "type": "string",
+          "description": "Stringified JSON keyword-response mapping (Keyword mode)."
+        },
+        "webhookUrl": {
+          "type": "string",
+          "description": "Simulated Webhook endpoint integration."
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "Simulated developer API integrations key."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp when updated."
+        }
+      },
+      "required": ["id", "userId", "name", "phoneNumber", "status", "mode", "welcomeMessage", "createdAt"]
+    },
+    "whatsappBotLog": {
+      "title": "WhatsApp Bot Message Log",
+      "description": "Stores transaction logs of messages received and replied to by a hosted WhatsApp bot.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique log record ID."
+        },
+        "botId": {
+          "type": "string",
+          "description": "The linked Bot ID."
+        },
+        "sender": {
+          "type": "string",
+          "description": "Incoming message sender (e.g. +254712...)."
+        },
+        "message": {
+          "type": "string",
+          "description": "The client's incoming text."
+        },
+        "reply": {
+          "type": "string",
+          "description": "The bot's response text."
+        },
+        "triggerMode": {
+          "type": "string",
+          "description": "The triggering rule (ai, keyword, welcome_only)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp."
+        }
+      },
+      "required": ["id", "botId", "sender", "message", "reply", "triggerMode", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/userMonetization/{userId}": {
+      "schema": "userMonetization",
+      "description": "Monetization profiles of users."
+    },
+    "/referralSales/{saleId}": {
+      "schema": "referralSale",
+      "description": "Details of completed referred purchases."
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": "withdrawal",
+      "description": "Affiliate cash-out payout requests."
+    },
+    "/whatsappBots/{botId}": {
+      "schema": "whatsappBot",
+      "description": "Details and config of hosted bots."
+    },
+    "/whatsappBots/{botId}/logs/{logId}": {
+      "schema": "whatsappBotLog",
+      "description": "Message logs processed by a specific bot."
+    }
+  }
+}

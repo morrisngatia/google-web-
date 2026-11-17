@@ -15,6 +15,164 @@ async function startServer() {
 
   app.use(express.json());
 
+  // In-memory cache for IPTV streams and channels
+  let streamsCache: any[] = [];
+  let channelsCache: any[] = [];
+  let mappedChannelsCache: any[] = [];
+  let isIptvLoading = false;
+  let iptvError: string | null = null;
+  let countriesList: { code: string; count: number }[] = [];
+  let categoriesList: { name: string; count: number }[] = [];
+
+  async function loadIptvData() {
+    if (isIptvLoading || mappedChannelsCache.length > 0) return;
+    isIptvLoading = true;
+    iptvError = null;
+    try {
+      console.log("Loading IPTV streams and channels from iptv-org/api...");
+      const [streamsRes, channelsRes] = await Promise.all([
+        fetch("https://iptv-org.github.io/api/streams.json").then((r) => r.json()),
+        fetch("https://iptv-org.github.io/api/channels.json").then((r) => r.json()),
+      ]);
+
+      streamsCache = Array.isArray(streamsRes) ? streamsRes : [];
+      channelsCache = Array.isArray(channelsRes) ? channelsRes : [];
+
+      console.log(`Fetched ${streamsCache.length} streams and ${channelsCache.length} channels.`);
+
+      // Create a map of channel ID to channel info for O(1) lookups
+      const channelMap = new Map();
+      for (const chan of channelsCache) {
+        if (chan && chan.id) {
+          channelMap.set(chan.id, chan);
+        }
+      }
+
+      // Map streams with channel metadata
+      const tempMapped: any[] = [];
+      const countryCounts: { [code: string]: number } = {};
+      const catCounts: { [name: string]: number } = {};
+
+      for (const stream of streamsCache) {
+        if (!stream || !stream.url) continue;
+
+        const channelId = stream.channel;
+        const channelInfo = channelId ? channelMap.get(channelId) : null;
+
+        const name = stream.title || (channelInfo && channelInfo.name) || "Unnamed Stream";
+        const country = (channelInfo && channelInfo.country) || "Global";
+        const logo = (channelInfo && channelInfo.logo) || null;
+        const website = (channelInfo && channelInfo.website) || null;
+        const categories = (channelInfo && channelInfo.categories && channelInfo.categories.length > 0) 
+          ? channelInfo.categories 
+          : ["general"];
+
+        // Update counts
+        countryCounts[country] = (countryCounts[country] || 0) + 1;
+        for (const cat of categories) {
+          const lowerCat = cat.toLowerCase();
+          catCounts[lowerCat] = (catCounts[lowerCat] || 0) + 1;
+        }
+
+        tempMapped.push({
+          id: stream.url,
+          name,
+          url: stream.url,
+          quality: stream.quality || "SD",
+          country,
+          categories,
+          logo,
+          website
+        });
+      }
+
+      mappedChannelsCache = tempMapped;
+
+      // Format lists for filtering
+      countriesList = Object.entries(countryCounts)
+        .map(([code, count]) => ({ code, count }))
+        .sort((a, b) => b.count - a.count);
+
+      categoriesList = Object.entries(catCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+      console.log(`IPTV mapping complete! Total active mapped streams: ${mappedChannelsCache.length}`);
+    } catch (err: any) {
+      console.error("Failed to fetch/map IPTV data:", err);
+      iptvError = err.message || "Failed to parse IPTV lists";
+    } finally {
+      isIptvLoading = false;
+    }
+  }
+
+  // API Route: IPTV Status
+  app.get("/api/iptv/status", async (req, res) => {
+    // Proactively trigger load in the background if empty
+    if (mappedChannelsCache.length === 0 && !isIptvLoading) {
+      loadIptvData().catch(console.error);
+    }
+
+    res.json({
+      loaded: mappedChannelsCache.length > 0,
+      loading: isIptvLoading,
+      count: mappedChannelsCache.length,
+      error: iptvError
+    });
+  });
+
+  // API Route: Get IPTV Countries List
+  app.get("/api/iptv/countries", async (req, res) => {
+    if (mappedChannelsCache.length === 0) {
+      await loadIptvData().catch(console.error);
+    }
+    res.json(countriesList);
+  });
+
+  // API Route: Get IPTV Categories List
+  app.get("/api/iptv/categories", async (req, res) => {
+    if (mappedChannelsCache.length === 0) {
+      await loadIptvData().catch(console.error);
+    }
+    res.json(categoriesList);
+  });
+
+  // API Route: IPTV Search & Filter Channels
+  app.get("/api/iptv/search", async (req, res) => {
+    if (mappedChannelsCache.length === 0) {
+      await loadIptvData().catch(console.error);
+    }
+
+    const q = typeof req.query.q === "string" ? req.query.q.toLowerCase().trim() : "";
+    const country = typeof req.query.country === "string" ? req.query.country.toUpperCase().trim() : "";
+    const category = typeof req.query.category === "string" ? req.query.category.toLowerCase().trim() : "";
+    const limit = Math.min(parseInt(typeof req.query.limit === "string" ? req.query.limit : "100") || 100, 500);
+
+    let results = mappedChannelsCache;
+
+    if (country) {
+      results = results.filter(item => item.country === country);
+    }
+
+    if (category) {
+      results = results.filter(item => item.categories.some((c: string) => c.toLowerCase() === category));
+    }
+
+    if (q) {
+      results = results.filter(item => 
+        item.name.toLowerCase().includes(q) || 
+        item.country.toLowerCase().includes(q) ||
+        item.categories.some((c: string) => c.toLowerCase().includes(q))
+      );
+    }
+
+    res.json({
+      total: results.length,
+      limit,
+      results: results.slice(0, limit)
+    });
+  });
+
   // API Route: Get Product List
   app.get("/api/products", (req, res) => {
     res.json(PRODUCTS);

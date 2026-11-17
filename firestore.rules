@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validator for User Monetization Profile
+    function isValidUserMonetization(data) {
+      return data.id is string 
+        && data.id.size() <= 128
+        && data.isActivated is bool
+        && data.referralCode is string
+        && data.referralCode.size() <= 64
+        && data.clicks is int
+        && data.salesCount is int
+        && data.earningsUSD is number;
+    }
+
+    // Validator for Referral Sale Record
+    function isValidReferralSale(data) {
+      return data.id is string
+        && data.id.size() <= 128
+        && data.referrerId is string
+        && data.referrerId.size() <= 128
+        && data.orderId is string
+        && data.orderId.size() <= 128
+        && data.amountKES is number
+        && data.commissionUSD is number;
+    }
+
+    // Validator for Withdrawal Request
+    function isValidWithdrawal(data) {
+      return data.id is string
+        && data.id.size() <= 128
+        && data.userId is string
+        && data.userId.size() <= 128
+        && data.amountUSD is number
+        && data.amountKES is number
+        && data.mpesaNumber is string
+        && data.mpesaNumber.size() <= 64
+        && data.status is string
+        && data.status.size() <= 32;
+    }
+
+    // Validator for WhatsApp Bot Configuration
+    function isValidWhatsappBot(data) {
+      return data.id is string
+        && data.id.size() <= 128
+        && data.userId is string
+        && data.userId.size() <= 128
+        && data.name is string
+        && data.name.size() <= 128
+        && data.phoneNumber is string
+        && data.phoneNumber.size() <= 64
+        && data.status is string
+        && data.status.size() <= 32
+        && data.mode is string
+        && data.mode.size() <= 32
+        && data.welcomeMessage is string
+        && data.welcomeMessage.size() <= 2000;
+    }
+
+    // Validator for WhatsApp Bot Log Entry
+    function isValidWhatsappBotLog(data) {
+      return data.id is string
+        && data.id.size() <= 128
+        && data.botId is string
+        && data.botId.size() <= 128
+        && data.sender is string
+        && data.sender.size() <= 64
+        && data.message is string
+        && data.message.size() <= 5000
+        && data.reply is string
+        && data.reply.size() <= 5000
+        && data.triggerMode is string
+        && data.triggerMode.size() <= 32
+        && data.timestamp is string
+        && data.timestamp.size() <= 64;
+    }
+
+    // Match rules for userMonetization collection
+    match /userMonetization/{userId} {
+      allow get: if true; // Any client can check if a referral code is valid
+      allow create: if isOwner(userId) && isValidUserMonetization(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserMonetization(request.resource.data)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.referralCode == resource.data.referralCode;
+      allow list, delete: if false;
+    }
+
+    // Match rules for referralSales collection
+    match /referralSales/{saleId} {
+      allow get, list: if isSignedIn() && resource.data.referrerId == request.auth.uid;
+      allow create: if isValidReferralSale(request.resource.data)
+        && exists(/databases/$(database)/documents/userMonetization/$(request.resource.data.referrerId));
+      allow update, delete: if false;
+    }
+
+    // Match rules for withdrawals collection
+    match /withdrawals/{withdrawalId} {
+      allow get, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId) && isValidWithdrawal(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // Match rules for whatsappBots collection
+    match /whatsappBots/{botId} {
+      allow get, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId) && isValidWhatsappBot(request.resource.data);
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && isValidWhatsappBot(request.resource.data)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isOwner(resource.data.userId);
+
+      // Match rules for subcollection logs
+      match /logs/{logId} {
+        allow get, list: if isSignedIn() && get(/databases/$(database)/documents/whatsappBots/$(botId)).data.userId == request.auth.uid;
+        allow create: if isSignedIn() && get(/databases/$(database)/documents/whatsappBots/$(botId)).data.userId == request.auth.uid && isValidWhatsappBotLog(request.resource.data);
+        allow update, delete: if false;
+      }
+    }
+  }
+}

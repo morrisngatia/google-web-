@@ -15,14 +15,61 @@ interface CoutureDriveProps {
     phone: string;
     address: string;
   };
+  onTriggerToast?: (msg: string) => void;
 }
 
-export default function CoutureDrive({ profile }: CoutureDriveProps) {
+export default function CoutureDrive({ profile, onTriggerToast }: CoutureDriveProps) {
   // Auth states
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [needsAuth, setNeedsAuth] = useState(true);
+  const [needsAuth, setNeedsAuth] = useState(() => {
+    const skipped = localStorage.getItem("moh_skip_drive_auth") === "true";
+    return !skipped;
+  });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Local File states
+  const [localCoutureFiles, setLocalCoutureFiles] = useState<any[]>(() => {
+    const cached = localStorage.getItem("moh_couture_files");
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        // Fallback
+      }
+    }
+    return [
+      {
+        id: "f-1",
+        name: "safari_gold_embroidery_spec.pdf",
+        webViewLink: "#",
+        mimeType: "application/pdf",
+        size: "131072", // 128 KB
+        modifiedTime: "2026-07-11T14:30:00Z"
+      },
+      {
+        id: "f-2",
+        name: "utawala_bridal_sketch.png",
+        webViewLink: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800",
+        mimeType: "image/png",
+        size: "1468006", // 1.4 MB
+        modifiedTime: "2026-07-12T10:15:00Z"
+      },
+      {
+        id: "f-3",
+        name: "beaded_collar_choker_blueprint.png",
+        webViewLink: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800",
+        mimeType: "image/png",
+        size: "737280", // 720 KB
+        modifiedTime: "2026-07-13T09:45:00Z"
+      }
+    ];
+  });
+
+  // Sync local files to localStorage on change
+  useEffect(() => {
+    localStorage.setItem("moh_couture_files", JSON.stringify(localCoutureFiles));
+  }, [localCoutureFiles]);
 
   // File states
   const [files, setFiles] = useState<GoogleDriveFile[]>([]);
@@ -53,7 +100,10 @@ export default function CoutureDrive({ profile }: CoutureDriveProps) {
         detectAndLoadWorkspace(currentToken);
       },
       () => {
-        setNeedsAuth(true);
+        const skipped = localStorage.getItem("moh_skip_drive_auth") === "true";
+        if (!skipped) {
+          setNeedsAuth(true);
+        }
         setUser(null);
         setToken(null);
       }
@@ -125,6 +175,7 @@ export default function CoutureDrive({ profile }: CoutureDriveProps) {
         setUser(result.user);
         setToken(result.accessToken);
         setNeedsAuth(false);
+        localStorage.removeItem("moh_skip_drive_auth");
         await detectAndLoadWorkspace(result.accessToken);
       }
     } catch (err: any) {
@@ -144,6 +195,7 @@ export default function CoutureDrive({ profile }: CoutureDriveProps) {
       setNeedsAuth(true);
       setFiles([]);
       setWorkspaceFolderId(null);
+      localStorage.setItem("moh_skip_drive_auth", "false");
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -169,9 +221,8 @@ export default function CoutureDrive({ profile }: CoutureDriveProps) {
     }
   };
 
-  // 7. Sync Profile & Sizing Card to Google Drive
+  // 7. Sync Profile & Sizing Card to Google Drive / Local Storage
   const handleSyncProfile = async () => {
-    if (!token) return;
     setSyncStatus("syncing");
     setErrorMessage(null);
     try {
@@ -207,6 +258,37 @@ prior to initiating stitching on custom runway collection pieces.
 Thank you for choosing Moh Stylist Couture!
 ===================================================================`;
 
+      if (!token) {
+        // Offline local sync fallback
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        
+        const newFile = {
+          id: "f-specs",
+          name: "Moh_Stylist_Sizing_Specs.txt",
+          webViewLink: "#",
+          mimeType: "text/plain",
+          size: specString.length.toString(),
+          modifiedTime: new Date().toISOString()
+        };
+
+        setLocalCoutureFiles(prev => {
+          const filtered = prev.filter(f => f.name !== "Moh_Stylist_Sizing_Specs.txt");
+          const next = [newFile, ...filtered];
+          localStorage.setItem("moh_couture_files", JSON.stringify(next));
+          return next;
+        });
+
+        setSyncStatus("success");
+        setSuccessMessage("Your couture sizing specs are successfully synced to your Local Workspace!");
+        setTimeout(() => setSyncStatus("idle"), 2500);
+        setTimeout(() => setSuccessMessage(null), 4000);
+
+        if (onTriggerToast) {
+          onTriggerToast("Specs Synced Locally!");
+        }
+        return;
+      }
+
       const blob = new Blob([specString], { type: "text/plain" });
       const parentId = workspaceFolderId || undefined;
       
@@ -218,6 +300,9 @@ Thank you for choosing Moh Stylist Couture!
       setTimeout(() => setSyncStatus("idle"), 2500);
       setTimeout(() => setSuccessMessage(null), 4000);
       
+      if (onTriggerToast) {
+        onTriggerToast("Specs Synced!");
+      }
       // Refresh list
       await handleReload();
     } catch (err: any) {
@@ -230,11 +315,44 @@ Thank you for choosing Moh Stylist Couture!
   // 8. Upload local document/file
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
-    if (!fileList || fileList.length === 0 || !token) return;
+    if (!fileList || fileList.length === 0) return;
     
     const localFile = fileList[0];
     setUploadStatus("uploading");
     setErrorMessage(null);
+
+    if (!token) {
+      // Offline local upload fallback
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      
+      const newFile = {
+        id: "f-" + Math.floor(10000 + Math.random() * 90000),
+        name: localFile.name,
+        webViewLink: localFile.type.startsWith("image/") ? "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800" : "#",
+        mimeType: localFile.type || "application/octet-stream",
+        size: localFile.size.toString(),
+        modifiedTime: new Date().toISOString()
+      };
+
+      setLocalCoutureFiles(prev => {
+        const next = [newFile, ...prev];
+        localStorage.setItem("moh_couture_files", JSON.stringify(next));
+        return next;
+      });
+
+      setUploadStatus("success");
+      setSuccessMessage(`Uploaded "${localFile.name}" successfully to Local Workspace!`);
+      setTimeout(() => setUploadStatus("idle"), 2500);
+      setTimeout(() => setSuccessMessage(null), 4000);
+
+      if (onTriggerToast) {
+        onTriggerToast("Design Uploaded!");
+      }
+
+      // Clear input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     try {
       const parentId = workspaceFolderId || undefined;
@@ -244,6 +362,10 @@ Thank you for choosing Moh Stylist Couture!
       setSuccessMessage(`Uploaded "${localFile.name}" successfully!`);
       setTimeout(() => setUploadStatus("idle"), 2500);
       setTimeout(() => setSuccessMessage(null), 4000);
+      
+      if (onTriggerToast) {
+        onTriggerToast("Design Uploaded!");
+      }
       
       // Clear input
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -259,13 +381,26 @@ Thank you for choosing Moh Stylist Couture!
 
   // 9. Delete file (MANDATORY explicit confirmation prompt!)
   const handleDeleteFile = async (fileId: string, fileName: string) => {
-    if (!token) return;
-    
     // Explicit Confirmation Dialog - Mandatory for destructive operations!
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${fileName}" from your Google Drive? This action is permanent and cannot be undone.`
+      `Are you sure you want to delete "${fileName}"? This action is permanent and cannot be undone.`
     );
     if (!confirmed) return;
+
+    if (!token) {
+      // Local delete
+      setLocalCoutureFiles(prev => {
+        const next = prev.filter(f => f.id !== fileId);
+        localStorage.setItem("moh_couture_files", JSON.stringify(next));
+        return next;
+      });
+      setSuccessMessage(`Successfully deleted "${fileName}" locally`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      if (onTriggerToast) {
+        onTriggerToast("Design Deleted!");
+      }
+      return;
+    }
 
     setIsFetching(true);
     setErrorMessage(null);
@@ -273,6 +408,9 @@ Thank you for choosing Moh Stylist Couture!
       await deleteDriveFile(token, fileId);
       setSuccessMessage(`Successfully deleted "${fileName}"`);
       setTimeout(() => setSuccessMessage(null), 3000);
+      if (onTriggerToast) {
+        onTriggerToast("Design Deleted!");
+      }
       await handleReload();
     } catch (err: any) {
       console.error("Failed to delete file:", err);
@@ -283,13 +421,15 @@ Thank you for choosing Moh Stylist Couture!
   };
 
   // Filter files based on search box and category selectors
-  const filteredFiles = files.filter(f => {
+  const displayFiles = token ? files : localCoutureFiles;
+
+  const filteredFiles = displayFiles.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
 
     if (filterType === "all") return true;
-    if (filterType === "images") return f.mimeType.startsWith("image/");
-    if (filterType === "documents") return f.mimeType.includes("pdf") || f.mimeType.includes("text") || f.mimeType.includes("document") || f.mimeType.includes("spreadsheet") || f.mimeType.includes("presentation");
+    if (filterType === "images") return f.mimeType?.startsWith("image/") || f.mimeType?.startsWith("image") || f.name.endsWith(".png") || f.name.endsWith(".jpg") || f.name.endsWith(".jpeg");
+    if (filterType === "documents") return f.mimeType?.includes("pdf") || f.mimeType?.includes("text") || f.mimeType?.includes("document") || f.mimeType?.includes("spreadsheet") || f.mimeType?.includes("presentation") || f.name.endsWith(".pdf") || f.name.endsWith(".txt");
     if (filterType === "folders") return f.mimeType === "application/vnd.google-apps.folder";
     return true;
   });
@@ -308,7 +448,7 @@ Thank you for choosing Moh Stylist Couture!
           </p>
         </div>
         
-        {user && (
+        {user ? (
           <div className="flex items-center gap-3 bg-zinc-900/50 p-2 pl-3 pr-1.5 rounded-full border border-zinc-850 self-start sm:self-center">
             <div className="text-left">
               <span className="block text-[10px] font-bold text-zinc-300 font-mono leading-none">{user.displayName || "Google User"}</span>
@@ -322,7 +462,20 @@ Thank you for choosing Moh Stylist Couture!
               <LogOut className="h-3.5 w-3.5" />
             </button>
           </div>
-        )}
+        ) : !needsAuth ? (
+          <div className="flex items-center gap-3 bg-amber-500/5 p-2 pl-3.5 pr-2.5 rounded-full border border-amber-500/20 self-start sm:self-center">
+            <span className="text-[10px] font-bold text-amber-500 font-mono tracking-wider uppercase">Local Workspace</span>
+            <button 
+              onClick={() => {
+                localStorage.setItem("moh_skip_drive_auth", "false");
+                setNeedsAuth(true);
+              }}
+              className="px-2.5 py-1 text-[9px] bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-wider rounded-full duration-150 transition-all cursor-pointer"
+            >
+              Connect Cloud Drive
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {/* LOGIN STATE COVER */}
@@ -343,28 +496,44 @@ Thank you for choosing Moh Stylist Couture!
             </p>
           </div>
 
-          <button
-            onClick={handleLogin}
-            disabled={isLoggingIn}
-            className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-white text-zinc-900 font-bold text-xs rounded-xl hover:bg-zinc-100 transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
-          >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
-                <span>Opening Google Secure Handshake...</span>
-              </>
-            ) : (
-              <>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-4 w-4 shrink-0">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                </svg>
-                <span>Sign in with Google</span>
-              </>
-            )}
-          </button>
+          <div className="flex flex-col w-full space-y-2.5">
+            <button
+              onClick={handleLogin}
+              disabled={isLoggingIn}
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-white text-zinc-900 font-bold text-xs rounded-xl hover:bg-zinc-100 transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
+                  <span>Opening Google Handshake...</span>
+                </>
+              ) : (
+                <>
+                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="h-4 w-4 shrink-0">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                  </svg>
+                  <span>Sign in with Google</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                localStorage.setItem("moh_skip_drive_auth", "true");
+                setNeedsAuth(false);
+                if (onTriggerToast) {
+                  onTriggerToast("Switched to Local Workspace");
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 bg-zinc-900 hover:bg-zinc-850 text-zinc-300 font-bold text-xs rounded-xl border border-zinc-800 transition-all active:scale-95 duration-200 cursor-pointer"
+            >
+              <FolderOpen className="h-4 w-4 text-amber-500" />
+              <span>Continue with Local Workspace</span>
+            </button>
+          </div>
           
           <div className="flex items-center gap-1.5 text-[9px] text-zinc-600 font-mono">
             <Lock className="h-3 w-3 text-emerald-500/50" />

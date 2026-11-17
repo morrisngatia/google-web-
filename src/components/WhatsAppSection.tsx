@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { MessageCircle, Send, CheckCircle2, ShoppingCart, Scissors, Calendar, ShieldCheck, MapPin, Sparkles, Clipboard } from "lucide-react";
+import { 
+  MessageCircle, Scissors, Clipboard, CheckCircle2, ShieldCheck, Sparkles 
+} from "lucide-react";
 import { Product } from "../data/products";
 
 interface WhatsAppSectionProps {
@@ -11,8 +13,6 @@ type InquiryType = "product_order" | "bespoke_tailoring" | "styling_session" | "
 
 export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppSectionProps) {
   const [inquiryType, setInquiryType] = useState<InquiryType>("product_order");
-  
-  // Form fields
   const [clientName, setClientName] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "");
   const [sizePreference, setSizePreference] = useState("M");
@@ -26,16 +26,11 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
   const [customRequest, setCustomRequest] = useState("");
-  
   const [copied, setCopied] = useState(false);
 
-  // Retrieve details for selected product
   const selectedProduct = products.find((p) => p.id === selectedProductId);
 
-  // Generate pre-filled text
   const generateWhatsAppMessage = (): string => {
-    const greeting = `Hello Moh Stylist Team, I would like to make an inquiry/order:`;
-    
     if (inquiryType === "product_order" && selectedProduct) {
       let msg = `✨ *MOH STYLIST MARKETPLACE ORDER* ✨\n\n`;
       msg += `👤 *Client Name:* ${clientName || "[Your Name]"}\n`;
@@ -73,7 +68,7 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
       msg += `Please let me know if I need to visit your Utawala studio or schedule a virtual measurement.`;
       return msg;
     }
-
+    
     if (inquiryType === "styling_session") {
       let msg = `✨ *STYLING SESSION BOOKING INQUIRY* ✨\n\n`;
       msg += `👤 *Client Name:* ${clientName || "[Your Name]"}\n`;
@@ -84,7 +79,6 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
       return msg;
     }
 
-    // General inquiry
     let msg = `✨ *MOH STYLIST GENERAL ENQUIRY* ✨\n\n`;
     msg += `👤 *Client Name:* ${clientName || "[Your Name]"}\n`;
     msg += `💬 *Message:* ${customRequest || "Hi Moh, I'd love to learn more about your upcoming Nairobi runway designs."}\n`;
@@ -93,7 +87,6 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
 
   const formattedMsg = generateWhatsAppMessage();
   const encodedMsg = encodeURIComponent(formattedMsg);
-  // Phone number 0708063447 in Kenyan international format (without + or lead zeros)
   const waLink = `https://wa.me/254708063447?text=${encodedMsg}`;
 
   const handleCopy = () => {
@@ -102,36 +95,37 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const quickFillOrder = (productId: string, productName: string) => {
+  const quickFillOrder = (productId: string) => {
     setInquiryType("product_order");
     setSelectedProductId(productId);
     setCustomRequest("");
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 pb-20 animate-fade-in" id="whatsapp-order-hub">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 pb-20 animate-fade-in" id="whatsapp-master-workspace">
       {/* Visual Header */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 to-black border border-amber-500/20 p-8 md:p-12 mb-10 shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute bottom-0 left-1/4 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl -z-10"></div>
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-950 to-black border border-amber-500/20 p-8 md:p-12 mb-8 shadow-2xl">
+        <div className="absolute top-0 right-0 w-85 h-85 bg-amber-500/10 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute bottom-0 left-1/4 w-65 h-65 bg-emerald-500/5 rounded-full blur-3xl -z-10"></div>
         
-        <div className="max-w-3xl space-y-4">
+        <div className="max-w-4xl space-y-4">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full text-xs font-mono tracking-widest uppercase">
-            <MessageCircle className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
-            <span>VIP WhatsApp Order Desk</span>
+            <Scissors className="h-3.5 w-3.5 text-amber-400" />
+            <span>MOH Custom Atelier</span>
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white font-display">
-            Fast WhatsApp Ordering & <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">Bespoke Couture</span>
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white font-display uppercase">
+            MOH WHATSAPP <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">VIP ORDER DESK</span>
           </h1>
           
           <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-            Skip the checkout queues entirely. Build a tailored dispatch ticket or bespoke sizing query below, then instantly forward it to our primary stylist desk at <span className="text-amber-400 font-bold">0708063447</span>. Let's customize your next runway look.
+            Generate tailored dispatch packets, customize sizing coordinates for bespoke suits, and connect directly with Moh Stylist's design desk on WhatsApp for seamless ordering, fitting appointments, and style queries.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
         {/* Left Interactive Panel: The Generator Form */}
         <div className="lg:col-span-7 bg-zinc-950 border border-zinc-900 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl">
           <h2 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center space-x-2">
@@ -496,7 +490,7 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
             </div>
 
             {/* Simulated Chat Bubble */}
-            <div className="p-5 flex-1 min-h-[220px] max-h-[360px] overflow-y-auto bg-zinc-900/20 font-mono text-[11px] leading-relaxed text-zinc-300 select-text whitespace-pre-wrap">
+            <div className="p-5 flex-1 min-h-[220px] max-h-[360px] overflow-y-auto bg-zinc-900/20 font-mono text-[11px] leading-relaxed text-zinc-300 select-text whitespace-pre-wrap text-left">
               {formattedMsg}
             </div>
 
@@ -513,7 +507,6 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                id="submit-whatsapp-order"
                 className="w-full flex items-center justify-center space-x-2.5 py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold tracking-wider text-xs uppercase shadow-lg shadow-emerald-950/40 hover:shadow-emerald-500/10 transition-all text-center cursor-pointer"
               >
                 <MessageCircle className="h-4 w-4 shrink-0" />
@@ -528,7 +521,7 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
           </div>
 
           {/* Quick-Fill catalog options */}
-          <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4 shadow-xl text-left">
             <h3 className="text-xs font-bold tracking-widest text-zinc-400 uppercase flex items-center space-x-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
               <span>Quick Order Shortcuts</span>
@@ -542,8 +535,8 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
               {products.slice(0, 4).map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => quickFillOrder(p.id, p.name)}
-                  className="w-full flex items-center justify-between p-2.5 rounded-lg border border-zinc-900 hover:border-amber-500/20 bg-zinc-900/20 hover:bg-zinc-900 text-left transition-all group"
+                  onClick={() => quickFillOrder(p.id)}
+                  className="w-full flex items-center justify-between p-2.5 rounded-lg border border-zinc-900 hover:border-amber-500/20 bg-zinc-900/20 hover:bg-zinc-900 text-left transition-all group cursor-pointer"
                 >
                   <div className="space-y-0.5">
                     <p className="text-[11px] font-bold text-zinc-300 group-hover:text-amber-400 transition-colors">
@@ -562,13 +555,13 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
           </div>
 
           {/* Guarantee Badges */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 text-left">
             <div className="bg-zinc-950/40 p-4 border border-zinc-900 rounded-xl space-y-1">
               <span className="text-[10px] font-bold tracking-wider text-amber-400 uppercase block">
                 🚚 Nationwide Delivery
               </span>
               <p className="text-[9px] text-zinc-500 leading-relaxed">
-                Nairobi wide courier within 4 hours. Countrywide via G4S, Fargo, or Easy Coach parcels.
+                Nairobi wide courier within 4 hours. Countrywide via G4S or Fargo Courier.
               </p>
             </div>
             <div className="bg-zinc-950/40 p-4 border border-zinc-900 rounded-xl space-y-1">
@@ -576,7 +569,7 @@ export default function WhatsAppSection({ products, onSelectProduct }: WhatsAppS
                 ✂️ Bespoke Adjustments
               </span>
               <p className="text-[9px] text-zinc-500 leading-relaxed">
-                Free tailoring sizing checks and minor fits adjustments at our Utawala Studio near the Shopping Mall.
+                Free tailoring checks and minor fits adjustments at our Utawala Studio near the Mall.
               </p>
             </div>
           </div>
